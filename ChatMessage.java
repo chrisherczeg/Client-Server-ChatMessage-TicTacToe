@@ -42,5 +42,5 @@ final class ChatMessage implements Serializable {
     public void setUserNameOfRecipient(String userNameOfRecipient) {
         this.userNameOfRecipient = userNameOfRecipient;
     }
-    
+
 }

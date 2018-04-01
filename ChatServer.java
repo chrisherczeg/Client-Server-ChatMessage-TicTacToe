@@ -4,6 +4,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,5 +127,41 @@ final class ChatServer {
                 e.printStackTrace();
             }
         }
+        private boolean writeMessage(String msg){
+            if(!(socket.isConnected())) {
+                return false;
+            }
+            try {
+                sOutput.writeObject(msg);
+                return true;
+            }catch (IOException e){
+                return false;
+            }
+        }
+    }
+
+    private synchronized void broadcast(String message){
+        //TODO
+        //1. Iterate client list
+        //2. write message using writeMessage method
+        //3. Add date when broadcasting message SimpleDateFormat "HH:mm:ss"
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        message = dateFormat.toPattern() + message;
+
+        for (int i = 0; i < clients.size() ; i++) {
+            clients.get(i).writeMessage(message);
+        }
+        System.out.println(message);
+    }
+
+
+
+    private synchronized void remove(int id){
+        //TODO
+        clients.remove(id);
+    }
+
+    private void close(){
+        //TODO
     }
 }

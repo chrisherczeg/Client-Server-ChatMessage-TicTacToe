@@ -123,7 +123,9 @@ final class ChatClient {
             String userName = userInputs[1];
             if (userInputs.length > 2) {
                 String message = client.messageRebuilder(userInputs);
+                client.sendMessage(new ChatMessage(decision, message, userName));
             }
+
         }
         //Handle Logout
         else if(decision == 1){
