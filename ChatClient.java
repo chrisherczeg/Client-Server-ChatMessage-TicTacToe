@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.*;
 
+
 final class ChatClient {
     private ObjectInputStream sInput;
     private ObjectOutputStream sOutput;
@@ -14,6 +15,7 @@ final class ChatClient {
     private final String server;
     private final String username;
     private final int port;
+    private String messageSender;
 
     /* ChatClient constructor
      * @param server - the ip address of the server as a string
@@ -41,7 +43,7 @@ final class ChatClient {
      *
      * @return boolean - false if any errors occur in startup, true if successful
      */
-    private boolean start() {
+    private boolean start(ChatClient ccc) {
         // Create a socket
         try {
             socket = new Socket(server, port);
@@ -69,7 +71,10 @@ final class ChatClient {
         // Create client thread to listen from the server for incoming messages
         Runnable r = new ListenFromServer();
         Thread t = new Thread(r);
+        Runnable k = new KeyInput(ccc);
+        Thread keyboard = new Thread(k);
         t.start();
+        keyboard.start();
 
         // After starting, send the clients username to the server.
         try {
@@ -108,45 +113,18 @@ final class ChatClient {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
         // Get proper arguments and override defaults
-
         // Create your client and start it
         System.out.printf("Enter your username to sign into the Chat client: ");
         String user = in.nextLine();
-
         ChatClient client = new ChatClient("localhost", 1500, user);
-        client.start();
+        client.start(client);
 
         // Send an empty message to the server
         //client.sendMessage(new ChatMessage());
 
         System.out.println("Which would you like to do: \n/ttt play tictactoe" +
                 "\n/msg Broadcast a message\n/logout to logout\n/DM to direct message");
-        String userInput = in.nextLine();
-        String [] userInputs = userInput.split(" ");
-        int decision = client.userDecision(userInputs[0]);
-        String userName = userInputs[1];
-        /**
-         * 0. General Message (Believe that means broadcast)
-            1. Logout
-            2. DM
-            3. List
-            4. TicTacToe
-         */
-        if(decision != 1 || decision != 3) {
-            if (userInputs.length > 2) {
-                String message = client.messageRebuilder(userInputs);
-                client.sendMessage(new ChatMessage(decision, message, userName));
-            }
-        }
-        //Handle Logout
-        else if(decision == 1){
-            client.sendMessage(new ChatMessage(1, " ", userName));
 
-        }//Handle List
-        else if(decision == 3){
-            client.sendMessage(new ChatMessage(3, " ", userName));
-
-        }
     }
     private int userDecision(String userInput){
         userInput = userInput.toLowerCase();
@@ -187,6 +165,50 @@ final class ChatClient {
                     System.out.print(msg);
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private final class KeyInput implements Runnable {
+        Scanner in = new Scanner(System.in);
+        private ChatClient client;
+
+        public KeyInput(ChatClient client) {
+            this.client = client;
+        }
+
+        public void run() {
+            System.out.println("Waiting for response");
+            while (true) {
+                if (in.hasNext()) {
+                    String[] userInputs = in.nextLine().split(" ");
+                    if(userInputs.length >=2) {
+                        int decision = client.userDecision(userInputs[0]);
+                        String userName = userInputs[1];
+                        /**
+                         * 0. General Message (Believe that means broadcast)
+                         1. Logout
+                         2. DM
+                         3. List
+                         4. TicTacToe
+                         */
+                        if (decision != 1 || decision != 3) {
+                            if (userInputs.length > 2) {
+                                String message = client.messageRebuilder(userInputs);
+                                client.sendMessage(new ChatMessage(decision, message, userName));
+                            }
+                        }
+                        //Handle Logout
+                        else if (decision == 1) {
+                            client.sendMessage(new ChatMessage(1, " ", userName));
+
+                        }//Handle List
+                        else if (decision == 3) {
+                            client.sendMessage(new ChatMessage(3, " ", userName));
+
+                        }
+                    }
                 }
             }
         }

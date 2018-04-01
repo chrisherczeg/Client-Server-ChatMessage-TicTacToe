@@ -117,7 +117,7 @@ final class ChatServer {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            System.out.println(username + ": Ping");
+            System.out.println(username + cm.getMessage());
 
             // Send message back to the client
             try {
