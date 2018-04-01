@@ -81,7 +81,6 @@ final class ChatClient {
         return true;
     }
 
-
     /*
      * Sends a string to the server
      * @param msg - the message to be sent
@@ -116,41 +115,47 @@ final class ChatClient {
         // Send an empty message to the server
         //client.sendMessage(new ChatMessage());
         Scanner in = new Scanner(System.in);
+        System.out.println("Which would you like to do: \n/ttt play tictactoe" +
+                "\n/msg Broadcast a message\n/logout to logout\n/DM to direct message");
         String userInput = in.nextLine();
         String [] userInputs = userInput.split(" ");
         int decision = client.userDecision(userInputs[0]);
+        String userName = userInputs[1];
+        /**
+         * 0. General Message (Believe that means broadcast)
+            1. Logout
+            2. DM
+            3. List
+            4. TicTacToe
+         */
         if(decision != 1 || decision != 3) {
-            String userName = userInputs[1];
             if (userInputs.length > 2) {
                 String message = client.messageRebuilder(userInputs);
                 client.sendMessage(new ChatMessage(decision, message, userName));
             }
-
         }
         //Handle Logout
         else if(decision == 1){
+            client.sendMessage(new ChatMessage(1, " ", userName));
 
         }//Handle List
         else if(decision == 3){
+            client.sendMessage(new ChatMessage(3, " ", userName));
 
         }
-
-
-
-
-
-
-
     }
     private int userDecision(String userInput){
         userInput = userInput.toLowerCase();
-        if(userInput.substring(0,5).equals("/list")){
-            return 3;
-        }else if(userInput.substring(0,4).equals("/msg")){
+        if(userInput.length() < 3){
+            return -1;
+        }
+        else if(userInput.substring(0,4).equals("/msg")){
             return 2;
         }else if(userInput.substring(0,4).equals("/ttt")){
             return 4;
-        }else if(userInput.substring(0,7).equals("/logout")){
+        }else if(userInput.substring(0,5).equals("/list")){
+            return 3;
+        } else if(userInput.substring(0,7).equals("/logout")){
             return 1;
         }else{
             return 0;
@@ -165,8 +170,6 @@ final class ChatClient {
         }
         return message;
     }
-
-
 
 
     /*
