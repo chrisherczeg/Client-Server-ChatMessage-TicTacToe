@@ -134,7 +134,37 @@ final class ChatServer {
                             System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent));
                     }//close if
                 }//close for
-            }//close action if
+            }else if(action == 0){
+
+            }else if (action == 1){
+                for (int i = 0; i < clients.size() ; i++) {
+                    if(clients.get(i).username.equals(toUser)){
+                        try {
+                            clients.get(i).sInput.close();
+                            clients.get(i).sOutput.close();
+                            clients.get(i).socket.close();
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+                        clients.remove(i);
+                    }
+                }
+            }else if (action == 3){
+                messageToBeSent = "User List: \n";
+                int userSendIndex = 0;
+                for (int i = 0; i <clients.size(); i++) {
+                    if(!(clients.get(i).username.equals(toUser))){
+                        messageToBeSent = messageToBeSent + clients.get(i).username + "\n";
+                    }else{
+                        userSendIndex = i;
+                    }
+                }
+                System.out.println("Printing list for: " + username);
+                clients.get(userSendIndex).writeMessage(messageToBeSent);
+
+            }else if(action == 4){
+                //TODO tic tac toe
+            }
         }//close run
         private boolean writeMessage(String msg){
             if(!(socket.isConnected())) {

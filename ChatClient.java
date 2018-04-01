@@ -16,6 +16,7 @@ final class ChatClient {
     private final String username;
     private final int port;
     private String messageSender;
+    private String user;
 
     /* ChatClient constructor
      * @param server - the ip address of the server as a string
@@ -202,10 +203,19 @@ final class ChatClient {
                         //Handle Logout
                         else if (decision == 1) {
                             client.sendMessage(new ChatMessage(1, " ", userName));
+                            try{
+                                client.sInput.close();
+                                client.sOutput.close();
+                                client.socket.close();
+                            }catch(IOException e){
+                                e.printStackTrace();
+                            }
+
 
                         }//Handle List
                         else if (decision == 3) {
-                            client.sendMessage(new ChatMessage(3, " ", userName));
+                            client.sendMessage(new ChatMessage(3, " ",client.username ));
+
 
                         }
                     }
