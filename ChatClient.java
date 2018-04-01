@@ -106,15 +106,19 @@ final class ChatClient {
      * If the username is not specified "Anonymous" should be used
      */
     public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
         // Get proper arguments and override defaults
 
         // Create your client and start it
-        ChatClient client = new ChatClient("localhost", 1500, "CS 180 Student");
+        System.out.printf("Enter your username to sign into the Chat client: ");
+        String user = in.nextLine();
+
+        ChatClient client = new ChatClient("localhost", 1500, user);
         client.start();
 
         // Send an empty message to the server
         //client.sendMessage(new ChatMessage());
-        Scanner in = new Scanner(System.in);
+
         System.out.println("Which would you like to do: \n/ttt play tictactoe" +
                 "\n/msg Broadcast a message\n/logout to logout\n/DM to direct message");
         String userInput = in.nextLine();
@@ -149,13 +153,13 @@ final class ChatClient {
         if(userInput.length() < 3){
             return -1;
         }
-        else if(userInput.substring(0,4).equals("/msg")){
+        else if(userInput.substring(0,3).toLowerCase().equals("/dm")){
             return 2;
-        }else if(userInput.substring(0,4).equals("/ttt")){
+        }else if(userInput.substring(0,4).toLowerCase().equals("/ttt")){
             return 4;
-        }else if(userInput.substring(0,5).equals("/list")){
+        }else if(userInput.substring(0,5).toLowerCase().equals("/list")){
             return 3;
-        } else if(userInput.substring(0,7).equals("/logout")){
+        } else if(userInput.substring(0,7).toLowerCase().equals("/logout")){
             return 1;
         }else{
             return 0;
@@ -170,8 +174,6 @@ final class ChatClient {
         }
         return message;
     }
-
-
     /*
      * This is a private class inside of the ChatClient
      * It will be responsible for listening for messages from the ChatServer.

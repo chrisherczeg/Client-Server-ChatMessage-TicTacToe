@@ -51,8 +51,8 @@ final class ChatServer {
      *	Sample code to use as a reference for Tic Tac Toe
      *
      * directMessage - sends a message to a specific username, if connected
-     * @param message - the string to be sent
-     * @param username - the user the message will be sent to
+     * @param  - the string to be sent
+     * @param  - the user the message will be sent to
      */
     /*private synchronized void directMessage(String message, String username) {
         String time = sdf.format(new Date());
@@ -119,20 +119,34 @@ final class ChatServer {
             }
             System.out.println(username + ": Ping");
 
-
             // Send message back to the client
             try {
                 sOutput.writeObject("Pong");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+            String toUser = cm.getUserNameOfRecipient();
+            int action = cm.getTypeOfMessage();
+            String messageToBeSent = cm.getMessage();
+            /**
+             * Send Functionality for DM
+             */
+            if(action == 2) {
+                for (int i = 0; i < clients.size(); i++) {
+                    if (clients.get(i).username.equals(toUser)) {
+                            System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
+                            System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent));
+                    }//close if
+                }//close for
+            }//close action if
+        }//close run
         private boolean writeMessage(String msg){
             if(!(socket.isConnected())) {
                 return false;
             }
             try {
                 sOutput.writeObject(msg);
+                sOutput.flush();
                 return true;
             }catch (IOException e){
                 return false;
@@ -157,11 +171,10 @@ final class ChatServer {
 
 
     private synchronized void remove(int id){
-        //TODO
         clients.remove(id);
     }
 
     private void close(){
-        //TODO
+
     }
 }
