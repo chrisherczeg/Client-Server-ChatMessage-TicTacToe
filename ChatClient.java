@@ -147,7 +147,7 @@ final class ChatClient {
     private String messageRebuilder(String [] arr){
         String message = "";
         for (int i = 2; i < arr.length ; i++) {
-            message  = message + " ";
+            message  = message + arr[i] + " ";
 
         }
         return message;
@@ -193,7 +193,7 @@ final class ChatClient {
                          3. List
                          4. TicTacToe
                          */
-                        if (decision != 1 || decision != 3) {
+                        if (decision != 1 && decision != 3) {
                             if (userInputs.length > 2) {
                                 String message = client.messageRebuilder(userInputs);
                                 client.sendMessage(new ChatMessage(decision, message, userName));

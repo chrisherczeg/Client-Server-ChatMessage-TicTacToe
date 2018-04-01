@@ -34,6 +34,7 @@ final class ChatServer {
 
             try {
                 ServerSocket serverSocket = new ServerSocket(port);
+                System.out.println("<Server waiting for connection on port: " + this.port + ">");
                 while (true) {
                     Socket socket = serverSocket.accept();
                     Runnable r = new ClientThread(socket, uniqueId++);
@@ -117,17 +118,12 @@ final class ChatServer {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            System.out.println(username + cm.getMessage());
+            System.out.println(username + ": " + cm.getMessage());
 
             // Send message back to the client
-            try {
-                sOutput.writeObject("Pong");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             String toUser = cm.getUserNameOfRecipient();
             int action = cm.getTypeOfMessage();
-            String messageToBeSent = cm.getMessage();
+            String messageToBeSent = username + ": " +  cm.getMessage();
             /**
              * Send Functionality for DM
              */
@@ -145,7 +141,7 @@ final class ChatServer {
                 return false;
             }
             try {
-                sOutput.writeObject(msg);
+                sOutput.writeObject(msg + "\n");
                 sOutput.flush();
                 return true;
             }catch (IOException e){
