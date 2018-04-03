@@ -136,12 +136,12 @@ final class ChatClient {
             return 2;
         }else if(userInput.substring(0,4).toLowerCase().equals("/ttt")){
             return 4;
-        }else if(userInput.substring(0,5).toLowerCase().equals("/list")){
-            return 3;
-        } else if(userInput.substring(0,7).toLowerCase().equals("/logout")){
-            return 1;
-        }else{
+        }else if(userInput.substring(0,4).toLowerCase().equals("/msg")){
             return 0;
+        } else if(userInput.substring(0,5).toLowerCase().equals("/list")){
+            return 3;
+        }else{
+            return 1;
         }
     }
 
@@ -180,7 +180,7 @@ final class ChatClient {
         }
 
         public void run() {
-            System.out.println("Waiting for response");
+            //System.out.println("Waiting for response");
             while (true) {
                 if (in.hasNext()) {
                     String[] userInputs = in.nextLine().split(" ");
@@ -194,6 +194,10 @@ final class ChatClient {
                          3. List
                          4. TicTacToe
                          */
+                        if(decision == 0){
+                            String str = client.messageRebuilder((userInputs));
+                            client.sendMessage(new ChatMessage(decision, str, " "));
+                        }
                         if (decision != 1 && decision != 3) {
                             if (userInputs.length > 2) {
                                 String message = client.messageRebuilder(userInputs);
