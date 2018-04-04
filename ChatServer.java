@@ -29,7 +29,7 @@ final class ChatServer {
      * This is what starts the ChatServer.
      * Right now it just creates the socketServer and adds a new ClientThread to a list to be handled
      */
-    private void start() {
+    private void start(ChatServer client) {
 
 
             try {
@@ -37,7 +37,7 @@ final class ChatServer {
                 System.out.println("<Server waiting for connection on port: " + this.port + ">");
                 while (true) {
                     Socket socket = serverSocket.accept();
-                    Runnable r = new ClientThread(socket, uniqueId++);
+                    Runnable r = new ClientThread(socket, uniqueId++, client);
                     Thread t = new Thread(r);
                     clients.add((ClientThread) r);
                     t.start();
@@ -75,9 +75,8 @@ final class ChatServer {
      */
     public static void main(String[] args) {
         ChatServer server = new ChatServer(1500);
-        server.start();
+        server.start(server);
     }
-
 
     /*
      * This is a private class inside of the ChatServer
@@ -90,14 +89,16 @@ final class ChatServer {
         String username;                // Username of the connected client
         ChatMessage cm;                 // Helper variable to manage messages
         int id;
+        private ChatServer server;
 
         /*
          * socket - the socket the client is connected to
          * id - id of the connection
          */
-        private ClientThread(Socket socket, int id) {
+        private ClientThread(Socket socket, int id, ChatServer server) {
             this.id = id;
             this.socket = socket;
+            this.server = server;
             try {
                 sOutput = new ObjectOutputStream(socket.getOutputStream());
                 sInput = new ObjectInputStream(socket.getInputStream());
@@ -135,6 +136,9 @@ final class ChatServer {
                     }//close if
                 }//close for
             }else if(action == 0){
+                for (int i = 0; i < clients.size() ; i++) {
+                    server.broadcast(messageToBeSent);
+                }
 
             }else if (action == 1){
                 for (int i = 0; i < clients.size() ; i++) {
@@ -144,7 +148,7 @@ final class ChatServer {
                             clients.get(i).sOutput.close();
                             clients.get(i).socket.close();
                         }catch (IOException e){
-                            e.printStackTrace();
+                            System.out.println("Logging out");
                         }
                         clients.remove(i);
                     }
@@ -152,6 +156,7 @@ final class ChatServer {
             }else if (action == 3){
                 messageToBeSent = "User List: \n";
                 int userSendIndex = 0;
+                System.out.println("Listing: " + clients.size());
                 for (int i = 0; i <clients.size(); i++) {
                     if(!(clients.get(i).username.equals(toUser))){
                         messageToBeSent = messageToBeSent + clients.get(i).username + "\n";

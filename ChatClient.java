@@ -17,6 +17,7 @@ final class ChatClient {
     private final int port;
     private String messageSender;
     private String user;
+    private boolean loggedOut = false;
 
     /* ChatClient constructor
      * @param server - the ip address of the server as a string
@@ -91,12 +92,14 @@ final class ChatClient {
      * Sends a string to the server
      * @param msg - the message to be sent
      */
-    private void sendMessage(ChatMessage msg) {
-        try {
-            sOutput.writeObject(msg);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        private void sendMessage(ChatMessage msg) {
+            if(!loggedOut) {
+                try {
+                    sOutput.writeObject(msg);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
     }
 
 
@@ -145,9 +148,14 @@ final class ChatClient {
         }
     }
 
-    private String messageRebuilder(String [] arr){
+    private String messageRebuilder(String [] arr, int decision){
         String message = "";
-        for (int i = 2; i < arr.length ; i++) {
+        int c = 1;
+        if(decision == 2){
+            c = 2;
+        }
+
+        for (int i = c; i < arr.length ; i++) {
             message  = message + arr[i] + " ";
 
         }
@@ -165,7 +173,9 @@ final class ChatClient {
                     String msg = (String) sInput.readObject();
                     System.out.print(msg);
                 } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
+                    System.out.print("Logging out");
+                    loggedOut = true;
+                    break;
                 }
             }
         }
@@ -184,8 +194,8 @@ final class ChatClient {
             while (true) {
                 if (in.hasNext()) {
                     String[] userInputs = in.nextLine().split(" ");
+                    int decision = client.userDecision(userInputs[0]);
                     if(userInputs.length >=2) {
-                        int decision = client.userDecision(userInputs[0]);
                         String userName = userInputs[1];
                         /**
                          * 0. General Message (Believe that means broadcast)
@@ -194,19 +204,20 @@ final class ChatClient {
                          3. List
                          4. TicTacToe
                          */
-                        if(decision == 0){
-                            String str = client.messageRebuilder((userInputs));
+                        if (decision == 0) {
+                            String str = client.messageRebuilder(userInputs, 0);
                             client.sendMessage(new ChatMessage(decision, str, " "));
                         }
                         if (decision != 1 && decision != 3) {
                             if (userInputs.length > 2) {
-                                String message = client.messageRebuilder(userInputs);
+                                String message = client.messageRebuilder(userInputs, 1);
                                 client.sendMessage(new ChatMessage(decision, message, userName));
                             }
                         }
+                    }
                         //Handle Logout
                         else if (decision == 1) {
-                            client.sendMessage(new ChatMessage(1, " ", userName));
+                            client.sendMessage(new ChatMessage(1, " ", client.username));
                             try{
                                 client.sInput.close();
                                 client.sOutput.close();
@@ -218,13 +229,16 @@ final class ChatClient {
 
                         }//Handle List
                         else if (decision == 3) {
-                            client.sendMessage(new ChatMessage(3, " ",client.username ));
+                        try {
+                            client.sendMessage(new ChatMessage(3, " ", client.username));
+                        }catch (Exception e){
+                            System.out.println("See you soon <3");
+                        }
 
 
                         }
                     }
                 }
-            }
         }
     }
 }
