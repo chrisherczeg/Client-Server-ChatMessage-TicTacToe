@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,62 +115,62 @@ final class ChatServer {
         @Override
         public void run() {
             // Read the username sent to you by client
-            try {
-                cm = (ChatMessage) sInput.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            while (true){
+                try {
+                    cm = (ChatMessage) sInput.readObject();
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             System.out.println(username + ": " + cm.getMessage());
 
             // Send message back to the client
             String toUser = cm.getUserNameOfRecipient();
             int action = cm.getTypeOfMessage();
-            String messageToBeSent = username + ": " +  cm.getMessage();
+            String messageToBeSent = username + ": " + cm.getMessage();
             /**
              * Send Functionality for DM
              */
-            if(action == 2) {
+            if (action == cm.DM) {
                 for (int i = 0; i < clients.size(); i++) {
                     if (clients.get(i).username.equals(toUser)) {
-                            System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
-                            System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent));
+                        System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
+                        System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent));
                     }//close if
                 }//close for
-            }else if(action == 0){
-                for (int i = 0; i < clients.size() ; i++) {
-                    server.broadcast(messageToBeSent);
-                }
+            } else if (action == cm.MESSAGE) {
+                server.broadcast(messageToBeSent);
 
-            }else if (action == 1){
-                for (int i = 0; i < clients.size() ; i++) {
-                    if(clients.get(i).username.equals(toUser)){
+            } else if (action == cm.LOGOUT) {
+                for (int i = 0; i < clients.size(); i++) {
+                    if (clients.get(i).username.equals(toUser)) {
                         try {
                             clients.get(i).sInput.close();
                             clients.get(i).sOutput.close();
                             clients.get(i).socket.close();
-                        }catch (IOException e){
+                        } catch (IOException e) {
                             System.out.println("Logging out");
                         }
                         clients.remove(i);
                     }
                 }
-            }else if (action == 3){
+            } else if (action == cm.LIST) {
                 messageToBeSent = "User List: \n";
                 int userSendIndex = 0;
                 System.out.println("Listing: " + clients.size());
-                for (int i = 0; i <clients.size(); i++) {
-                    if(!(clients.get(i).username.equals(toUser))){
+                for (int i = 0; i < clients.size(); i++) {
+                    if (!(clients.get(i).username.equals(toUser))) {
                         messageToBeSent = messageToBeSent + clients.get(i).username + "\n";
-                    }else{
+                    } else {
                         userSendIndex = i;
                     }
                 }
                 System.out.println("Printing list for: " + username);
                 clients.get(userSendIndex).writeMessage(messageToBeSent);
 
-            }else if(action == 4){
+            } else if (action == cm.TICTACTOE) {
                 //TODO tic tac toe
             }
+        }
         }//close run
         private boolean writeMessage(String msg){
             if(!(socket.isConnected())) {
@@ -190,8 +191,9 @@ final class ChatServer {
         //1. Iterate client list
         //2. write message using writeMessage method
         //3. Add date when broadcasting message SimpleDateFormat "HH:mm:ss"
+        Date now = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        message = dateFormat.toPattern() + message;
+        message = dateFormat.format(now) + message;
 
         for (int i = 0; i < clients.size() ; i++) {
             clients.get(i).writeMessage(message);

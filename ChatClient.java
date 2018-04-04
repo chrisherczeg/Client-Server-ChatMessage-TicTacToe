@@ -154,10 +154,8 @@ final class ChatClient {
         if(decision == 2){
             c = 2;
         }
-
         for (int i = c; i < arr.length ; i++) {
             message  = message + arr[i] + " ";
-
         }
         return message;
     }
@@ -204,35 +202,40 @@ final class ChatClient {
                          3. List
                          4. TicTacToe
                          */
-                        if (decision == 0) {
+                        if (decision == ChatMessage.MESSAGE) {
                             String str = client.messageRebuilder(userInputs, 0);
                             client.sendMessage(new ChatMessage(decision, str, " "));
+                            continue;
                         }
-                        if (decision != 1 && decision != 3) {
+                        if (decision != ChatMessage.LOGOUT && decision != ChatMessage.LIST) {
                             if (userInputs.length > 2) {
                                 String message = client.messageRebuilder(userInputs, 1);
                                 client.sendMessage(new ChatMessage(decision, message, userName));
+                                continue;
                             }
                         }
                     }
                         //Handle Logout
-                        else if (decision == 1) {
+                        else if (decision == ChatMessage.LOGOUT) {
                             client.sendMessage(new ChatMessage(1, " ", client.username));
                             try{
                                 client.sInput.close();
                                 client.sOutput.close();
                                 client.socket.close();
+                                System.out.println("See you soon <3");
+                                break;
                             }catch(IOException e){
                                 e.printStackTrace();
                             }
 
 
                         }//Handle List
-                        else if (decision == 3) {
+                        else if (decision == ChatMessage.LIST) {
                         try {
                             client.sendMessage(new ChatMessage(3, " ", client.username));
+                            continue;
                         }catch (Exception e){
-                            System.out.println("See you soon <3");
+                            e.printStackTrace();
                         }
 
 
