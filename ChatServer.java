@@ -190,6 +190,47 @@ final class ChatServer {
 
             } else if (action == cm.TICTACTOE) {
                 //TODO tic tac toe
+                for (int i = 0; i < clients.size(); i++) {
+                    if (clients.get(i).username.equals(toUser)) {
+                        TicTacToeGame game = new TicTacToeGame(toUser, false);//maybe we could make an array list of all the current tictactoe games
+                        //System.out.print(game.toString());
+                        System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
+                        System.out.println("Success: " + clients.get(i).writeMessage("Started game with " + this.username));
+                        this.writeMessage("Started game with " + clients.get(i).username);
+                        //so now its told both clients that they have started the game
+                        //I need to get the next string that this client inputs
+                        while(true) { //need a different way to say while game is still going, do this(maybe put a method in tictactoe
+                            ChatMessage nextMove = null;
+                            ChatMessage nextMove2 = null;
+                            ObjectInputStream oppInput;
+                                /*try {
+                                    oppInput = new ObjectInputStream(clients.get(i).socket.getInputStream());
+                                }
+                                catch(IOException e){
+                                    return;
+                                }*/
+
+                            try {
+                                nextMove = (ChatMessage) sInput.readObject();//right now it only takes input from user who started the game
+                                //so to implement all the game stuff here, would need to get the socket for the other client, and make a new input
+                                //stream
+                            } catch (IOException | ClassNotFoundException e) { //so you could have it so that if another user tries to start a game with someone they are already in a game with, then it just takes it as if they are making a turn?
+                                e.printStackTrace();
+                            }
+                                /*try{
+                                    nextMove2 = (ChatMessage) oppInput.readObject();
+                                    game.takeTurn(Integer.parseInt(nextMove2.getMessage().substring(3, 4)));
+                                }catch(IOException | ClassNotFoundException e){
+                                    e.printStackTrace();
+                                }*/
+                            game.takeTurn(Integer.parseInt(nextMove.getMessage().substring(3, 4)));//that substring only works for two letter client names
+                            this.writeMessage(game.printbox());
+                            clients.get(i).writeMessage(game.printbox());
+                        }
+
+                    }//close if
+                }//close for
+
             }
         }
             if(notAllowedToConnect){
