@@ -50,7 +50,7 @@ final class ChatClient {
         try {
             socket = new Socket(server, port);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return false;
         }
 
@@ -58,7 +58,7 @@ final class ChatClient {
         try {
             sOutput = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return false;
         }
 
@@ -66,11 +66,12 @@ final class ChatClient {
         try {
             sInput = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return false;
         }
 
         // Create client thread to listen from the server for incoming messages
+        System.out.println("Connection accepted " + ccc.server +"/" + ccc.port);
         Runnable r = new ListenFromServer();
         Thread t = new Thread(r);
         Runnable k = new KeyInput(ccc);
@@ -121,13 +122,19 @@ final class ChatClient {
         System.out.printf("Enter your username to sign into the Chat client: ");
         String user = in.nextLine();
         ChatClient client = new ChatClient("localhost", 1500, user);
-        client.start(client);
+        if(!(client.start(client))){
+            System.out.println("Could not start the client, check that a Server is started.");
+        }else if (!client.socket.isConnected()) {
+            System.out.println("Sorry Connection closed");
+        }
+            //System.out.println("Which would you like to do: \n/ttt play tictactoe" +
+                   // "\n/msg Broadcast a message\n/logout to logout\n/DM to direct message");
+
 
         // Send an empty message to the server
         //client.sendMessage(new ChatMessage());
 
-        System.out.println("Which would you like to do: \n/ttt play tictactoe" +
-                "\n/msg Broadcast a message\n/logout to logout\n/DM to direct message");
+
 
     }
     private int userDecision(String userInput){
@@ -171,7 +178,7 @@ final class ChatClient {
                     String msg = (String) sInput.readObject();
                     System.out.print(msg);
                 } catch (IOException | ClassNotFoundException e) {
-                    System.out.print("Logging out");
+                    System.out.println("Server has closed the connection");
                     loggedOut = true;
                     break;
                 }
@@ -188,6 +195,9 @@ final class ChatClient {
         }
 
         public void run() {
+            if(!(client.socket.isConnected())){
+                System.out.println("Server has closed the connection");
+            }
             //System.out.println("Waiting for response");
             while (true) {
                 if (in.hasNext()) {

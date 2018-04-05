@@ -31,22 +31,34 @@ final class ChatServer {
      * Right now it just creates the socketServer and adds a new ClientThread to a list to be handled
      */
     private void start(ChatServer client) {
-
-
             try {
                 ServerSocket serverSocket = new ServerSocket(port);
-                System.out.println("<Server waiting for connection on port: " + this.port + ">");
                 while (true) {
+                    System.out.println("<Server waiting for connection on port: " + this.port + ">");
                     Socket socket = serverSocket.accept();
                     Runnable r = new ClientThread(socket, uniqueId++, client);
                     Thread t = new Thread(r);
                     clients.add((ClientThread) r);
+                    System.out.println(((ClientThread) r).username + " just connected");
                     t.start();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
+    }
+
+    private boolean checkExistingUser(String username){
+        int count = 0;
+        for (int i = 0; i < clients.size() ; i++) {
+            if(clients.get(i).username.equals(username)){
+                count++;
+            }
+        }
+        if(count > 1){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -114,10 +126,16 @@ final class ChatServer {
          */
         @Override
         public void run() {
+            boolean notAllowedToConnect = false;
+            if(server.checkExistingUser(username)){
+                clients.get(id).writeMessage("Sorry a username: " + clients.get(id) + " already exists");
+                notAllowedToConnect = true;
+            }
             // Read the username sent to you by client
-            while (true){
+            while (!notAllowedToConnect){
                 try {
                     cm = (ChatMessage) sInput.readObject();
+
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -130,6 +148,9 @@ final class ChatServer {
             /**
              * Send Functionality for DM
              */
+            if(notAllowedToConnect){
+
+            }
             if (action == cm.DM) {
                 for (int i = 0; i < clients.size(); i++) {
                     if (clients.get(i).username.equals(toUser)) {
@@ -171,13 +192,23 @@ final class ChatServer {
                 //TODO tic tac toe
             }
         }
+            if(notAllowedToConnect){
+                try {
+                    clients.get(id).sInput.close();
+                    clients.get(id).sOutput.close();
+                    clients.get(id).socket.close();
+                } catch (IOException e) {
+                    System.out.println("Closing connection");
+                }
+                clients.remove(id);
+            }
         }//close run
         private boolean writeMessage(String msg){
             if(!(socket.isConnected())) {
                 return false;
             }
             try {
-                sOutput.writeObject(msg + "\n");
+                sOutput.writeObject("> " + msg + "\n");
                 sOutput.flush();
                 return true;
             }catch (IOException e){
