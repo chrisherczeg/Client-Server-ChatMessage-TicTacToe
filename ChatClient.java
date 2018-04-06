@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -155,6 +156,9 @@ final class ChatClient {
     private String messageRebuilder(String [] arr, int decision){
         String message = "";
         int c = 1;
+        if(decision == 0){
+            c = 0;
+        }
         if(decision == 2){
             c = 2;
         }
@@ -180,13 +184,23 @@ final class ChatClient {
                     break;
                 }
             }
+            System.exit(0); //If we want reprompt instead of close take this out
         }
     }
 
     private final class TTT implements Runnable{
-
+        String opponent;
+        boolean didStart;
+        int move;
+        private TTT(String opponent, boolean didStart, int move){
+            this.opponent = opponent;
+            this.didStart = didStart;
+            this.move = move;
+        }
         public void run(){
+           while(move != 10){
 
+           }
         }
     }
 
@@ -207,6 +221,11 @@ final class ChatClient {
                 if (in.hasNext()) {
                     String[] userInputs = in.nextLine().split(" ");
                     int decision = client.userDecision(userInputs[0]);
+                    if (decision == ChatMessage.MESSAGE) {
+                        String str = client.messageRebuilder(userInputs, 0);
+                        client.sendMessage(new ChatMessage(decision, str, " "));
+                        continue;
+                    }
                     if(userInputs.length >=2) {
                         String userName = userInputs[1];
                         /**
@@ -216,16 +235,20 @@ final class ChatClient {
                          3. List
                          4. TicTacToe
                          */
-                        if (decision == ChatMessage.MESSAGE) {
-                            String str = client.messageRebuilder(userInputs, 0);
-                            client.sendMessage(new ChatMessage(decision, str, " "));
-                            continue;
-                        }
-                        if (decision != ChatMessage.LOGOUT && decision != ChatMessage.LIST) {
+                        //if (decision != ChatMessage.LOGOUT && decision != ChatMessage.LIST) {
+                        if(decision == ChatMessage.DM) {
                             if (userInputs.length > 2) {
-                                String message = client.messageRebuilder(userInputs, 1);
-                                client.sendMessage(new ChatMessage(decision, message, userName));
+                                String message = client.messageRebuilder(userInputs, 2);
+                                client.sendMessage(new ChatMessage(decision, client.username  + " -> " + userName + ": " + message, userName));
+                                Date now = new Date();
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                                String datemsg = dateFormat.format(now);
+                                System.out.println(datemsg + " " +client.username  + " -> " + userName + ": " + message);
                                 continue;
+                            }
+                        }else if(decision == ChatMessage.TICTACTOE){
+                            if(userInputs.length > 2){
+
                             }
                         }
                     }
@@ -241,8 +264,6 @@ final class ChatClient {
                             }catch(IOException e){
                                 e.printStackTrace();
                             }
-
-
                         }//Handle List
                         else if (decision == ChatMessage.LIST) {
                         try {
@@ -253,9 +274,9 @@ final class ChatClient {
                         }
 
 
-                        }
                     }
                 }
+            }
         }
     }
 }

@@ -39,7 +39,10 @@ final class ChatServer {
                     Runnable r = new ClientThread(socket, uniqueId++, client);
                     Thread t = new Thread(r);
                     clients.add((ClientThread) r);
-                    System.out.println(((ClientThread) r).username + " just connected");
+                    Date date = new Date();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                    String dateMsg = dateFormat.format(date);
+                    System.out.println(dateMsg + " " + ((ClientThread) r).username + " just connected");
                     t.start();
                 }
             } catch (IOException e) {
@@ -128,37 +131,41 @@ final class ChatServer {
         public void run() {
             boolean notAllowedToConnect = false;
             if(server.checkExistingUser(username)){
-                clients.get(id).writeMessage("Sorry a username: " + clients.get(id) + " already exists");
+                clients.get(id).writeMessage("Sorry a username: " + clients.get(id) + " already exists" , false);
                 notAllowedToConnect = true;
             }
             // Read the username sent to you by client
             while (!notAllowedToConnect){
                 try {
                     cm = (ChatMessage) sInput.readObject();
-
                 } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
+                    System.out.println("A Client forced closed without logging out, logging out for them");
+                    break;
                 }
-            System.out.println(username + ": " + cm.getMessage());
+                Date now = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                String dateMsg = dateFormat.format(now);
+                int indexOf = cm.getMessage().indexOf(" ");
+                //HACKY AF
+                System.out.println(dateMsg + " " +  username + "" + cm.getMessage().substring(indexOf));
 
             // Send message back to the client
             String toUser = cm.getUserNameOfRecipient();
             int action = cm.getTypeOfMessage();
-            String messageToBeSent = username + ": " + cm.getMessage();
+            String messageToBeSent = cm.getMessage();
             /**
              * Send Functionality for DM
              */
-            if(notAllowedToConnect){
-
-            }
             if (action == cm.DM) {
                 for (int i = 0; i < clients.size(); i++) {
                     if (clients.get(i).username.equals(toUser)) {
-                        System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
-                        System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent));
+                        //System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
+                        clients.get(i).writeMessage(messageToBeSent, false);
                     }//close if
                 }//close for
             } else if (action == cm.MESSAGE) {
+                messageToBeSent = username + ": " + messageToBeSent;
                 server.broadcast(messageToBeSent);
 
             } else if (action == cm.LOGOUT) {
@@ -174,6 +181,8 @@ final class ChatServer {
                         clients.remove(i);
                     }
                 }
+                System.out.print("Logged out");
+                break;
             } else if (action == cm.LIST) {
                 messageToBeSent = "User List: \n";
                 int userSendIndex = 0;
@@ -186,7 +195,7 @@ final class ChatServer {
                     }
                 }
                 System.out.println("Printing list for: " + username);
-                clients.get(userSendIndex).writeMessage(messageToBeSent);
+                clients.get(userSendIndex).writeMessage(messageToBeSent, false);
 
             } else if (action == cm.TICTACTOE) {
                 //TODO tic tac toe
@@ -195,8 +204,8 @@ final class ChatServer {
                         TicTacToeGame game = new TicTacToeGame(toUser, false);//maybe we could make an array list of all the current tictactoe games
                         //System.out.print(game.toString());
                         System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
-                        System.out.println("Success: " + clients.get(i).writeMessage("Started game with " + this.username));
-                        this.writeMessage("Started game with " + clients.get(i).username);
+                        System.out.println("Success: " + clients.get(i).writeMessage("Started game with " + this.username,false));
+                        this.writeMessage("Started game with " + clients.get(i).username, false);
                         //so now its told both clients that they have started the game
                         //I need to get the next string that this client inputs
                         while(true) { //need a different way to say while game is still going, do this(maybe put a method in tictactoe
@@ -224,8 +233,8 @@ final class ChatServer {
                                     e.printStackTrace();
                                 }*/
                             game.takeTurn(Integer.parseInt(nextMove.getMessage().substring(3, 4)));//that substring only works for two letter client names
-                            this.writeMessage(game.printbox());
-                            clients.get(i).writeMessage(game.printbox());
+                            this.writeMessage(game.printbox(), false);
+                            clients.get(i).writeMessage(game.printbox(), false);
                         }
 
                     }//close if
@@ -244,16 +253,29 @@ final class ChatServer {
                 clients.remove(id);
             }
         }//close run
-        private boolean writeMessage(String msg){
+        private boolean writeMessage(String msg, boolean broadcast){
             if(!(socket.isConnected())) {
                 return false;
             }
-            try {
-                sOutput.writeObject("> " + msg + "\n");
-                sOutput.flush();
-                return true;
-            }catch (IOException e){
-                return false;
+            if(broadcast) {
+                try {
+                    sOutput.writeObject("> " + msg + "\n");
+                    sOutput.flush();
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                }
+            }else{
+                Date now = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                String nonBroadcast = dateFormat.format(now) + " " + msg;
+                try {
+                    sOutput.writeObject("> " + nonBroadcast + "\n");
+                    sOutput.flush();
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                }
             }
         }
     }
@@ -265,10 +287,10 @@ final class ChatServer {
         //3. Add date when broadcasting message SimpleDateFormat "HH:mm:ss"
         Date now = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        message = dateFormat.format(now) + message;
+        message = dateFormat.format(now) + " "  + message;
 
         for (int i = 0; i < clients.size() ; i++) {
-            clients.get(i).writeMessage(message);
+            clients.get(i).writeMessage(message, true);
         }
         System.out.println(message);
     }
@@ -279,7 +301,7 @@ final class ChatServer {
         clients.remove(id);
     }
 
-    private void close(){
+    private static void close(ChatClient client){
 
     }
 }
