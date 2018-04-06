@@ -139,19 +139,16 @@ final class ChatClient {
     }
     private int userDecision(String userInput){
         userInput = userInput.toLowerCase();
-        if(userInput.length() < 3){
-            return -1;
-        }
-        else if(userInput.substring(0,3).toLowerCase().equals("/dm")){
-            return 2;
-        }else if(userInput.substring(0,4).toLowerCase().equals("/ttt")){
-            return 4;
-        }else if(userInput.substring(0,4).toLowerCase().equals("/msg")){
-            return 0;
-        } else if(userInput.substring(0,5).toLowerCase().equals("/list")){
-            return 3;
+        if(userInput.equals("/msg")){
+            return ChatMessage.DM;
+        }else if(userInput.equals("/ttt")){
+            return ChatMessage.TICTACTOE;
+        } else if(userInput.equals("/list")){
+            return ChatMessage.LIST;
+        }else if(userInput.equals("/logout")){
+            return ChatMessage.LOGOUT;
         }else{
-            return 1;
+            return ChatMessage.MESSAGE;
         }
     }
 
@@ -183,6 +180,13 @@ final class ChatClient {
                     break;
                 }
             }
+        }
+    }
+
+    private final class TTT implements Runnable{
+
+        public void run(){
+
         }
     }
 
