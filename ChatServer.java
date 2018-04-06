@@ -200,7 +200,7 @@ final class ChatServer {
                         //so now its told both clients that they have started the game
                         //I need to get the next string that this client inputs
                         while(true) { //need a different way to say while game is still going, do this(maybe put a method in tictactoe
-                            ChatMessage nextMove = null;
+                            ChatMessage nextMove = null;//server should send a message to the client to tell it that a game has started
                             ChatMessage nextMove2 = null;
                             ObjectInputStream oppInput;
                                 /*try {
