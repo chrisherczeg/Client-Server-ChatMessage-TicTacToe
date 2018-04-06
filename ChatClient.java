@@ -19,6 +19,8 @@ final class ChatClient {
     private String messageSender;
     private String user;
     private boolean loggedOut = false;
+    private ArrayList<String> clientsInTTTGame = new ArrayList<String>(); //array list for clients who are in the game
+    private ArrayList<Thread> games = new ArrayList<Thread>(); //array list for threads that have the game
 
     /* ChatClient constructor
      * @param server - the ip address of the server as a string
@@ -197,8 +199,17 @@ final class ChatClient {
             this.didStart = didStart;
             this.move = move;
         }
+
+        private TTT(String opponent, boolean didStart){
+            this.opponent = opponent;
+            this.didStart = didStart;
+        }
+
         public void run(){
+            TicTacToeGame game = new TicTacToeGame();
            while(move != 10){
+                game.takeTurn(move);
+                game.printbox();
 
            }
         }
@@ -248,6 +259,21 @@ final class ChatClient {
                             }
                         }else if(decision == ChatMessage.TICTACTOE){
                             if(userInputs.length > 2){
+                                //todo: start TTT thread and send message to make other client start thread | go to thread where the game is already happening
+                                boolean clientInGame = false;
+                                for(int i = 0; i < clientsInTTTGame.size(); i++){ //iterate through array
+                                    if(userName == clientsInTTTGame.get(i)) { //test if the client is already in a game with this client
+                                        //todo: make it go to the thread that is already carrying this game
+                                        clientInGame = true;
+                                        //TTT(userName, true, 0);
+                                    }
+                                }
+                                if(!clientInGame){
+                                   Thread game = new Thread(); //todo: make it start a TTT thread
+                                   games.add(game);
+                                   game.start();
+                                }
+
 
                             }
                         }

@@ -208,16 +208,16 @@ final class ChatServer {
                         this.writeMessage("Started game with " + clients.get(i).username, false);
                         //so now its told both clients that they have started the game
                         //I need to get the next string that this client inputs
-                        while(true) { //need a different way to say while game is still going, do this(maybe put a method in tictactoe
+                        /*while(true) { //need a different way to say while game is still going, do this(maybe put a method in tictactoe
                             ChatMessage nextMove = null;//server should send a message to the client to tell it that a game has started
                             ChatMessage nextMove2 = null;
                             ObjectInputStream oppInput;
-                                /*try {
+                                try {
                                     oppInput = new ObjectInputStream(clients.get(i).socket.getInputStream());
                                 }
                                 catch(IOException e){
                                     return;
-                                }*/
+                                }
 
                             try {
                                 nextMove = (ChatMessage) sInput.readObject();//right now it only takes input from user who started the game
@@ -226,16 +226,16 @@ final class ChatServer {
                             } catch (IOException | ClassNotFoundException e) { //so you could have it so that if another user tries to start a game with someone they are already in a game with, then it just takes it as if they are making a turn?
                                 e.printStackTrace();
                             }
-                                /*try{
+                                try{
                                     nextMove2 = (ChatMessage) oppInput.readObject();
                                     game.takeTurn(Integer.parseInt(nextMove2.getMessage().substring(3, 4)));
                                 }catch(IOException | ClassNotFoundException e){
                                     e.printStackTrace();
-                                }*/
+                                }
                             game.takeTurn(Integer.parseInt(nextMove.getMessage().substring(3, 4)));//that substring only works for two letter client names
                             this.writeMessage(game.printbox(), false);
                             clients.get(i).writeMessage(game.printbox(), false);
-                        }
+                        }*/
 
                     }//close if
                 }//close for
