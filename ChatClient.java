@@ -180,10 +180,16 @@ final class ChatClient {
                 try {
                     Object input = sInput.readObject();
                     if (input instanceof ChatMessage) {
-                        clientsInTTTGame.add(((ChatMessage) input).getMessage());
-                        System.out.println(((ChatMessage) input).getMessage());
-                        games.add(new TTT(((ChatMessage) input).getMessage(), false));
-                        continue;
+                        if(((ChatMessage) input).getTypeOfMessage() == ChatMessage.START_GAME){
+                            clientsInTTTGame.add(((ChatMessage) input).getMessage());
+                            System.out.println(((ChatMessage) input).getMessage());
+                            games.add(new TTT(((ChatMessage) input).getMessage(), false));
+                            continue;
+                        }
+                        if(((ChatMessage) input).getTypeOfMessage() == ChatMessage.TICTACTOE){
+                            //set the correct TTT box to be equal to the box just sent to it
+                            continue;
+                        }
                     }
                     String msg = (String) input;
                     System.out.print(msg);
@@ -289,7 +295,7 @@ final class ChatClient {
                                             try {
                                                 int move = Integer.parseInt(message.substring(0, 1));
                                                 games.get(i).playGame(move);
-                                                client.sendMessage(new ChatMessage(2, games.get(i).getBox(), userName));
+                                                client.sendMessage(new ChatMessage(decision, games.get(i).getBox(), userName));
                                             }
                                             catch(IllegalArgumentException e){
                                                 System.out.println(message);
@@ -303,7 +309,7 @@ final class ChatClient {
                                     clientsInTTTGame.add(userName);
                                     games.add(game);
                                    //todo: send start game message to the server
-                                    client.sendMessage(new ChatMessage(decision, "Started TicTacToe with " + client.username, userName));
+                                    client.sendMessage(new ChatMessage(5, "Started TicTacToe with " + client.username, userName));
                                     System.out.println("Started TicTacToe with " + userName);
                                 }
                             }

@@ -197,7 +197,15 @@ final class ChatServer {
                 System.out.println("Printing list for: " + username);
                 clients.get(userSendIndex).writeMessage(messageToBeSent, false);
 
-            } else if (action == cm.TICTACTOE) {
+            } else if(action == cm.TICTACTOE){
+                for (int i = 0; i < clients.size(); i++) {
+                    if (clients.get(i).username.equals(toUser)) {
+                        //System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
+                        clients.get(i).writeMessage(messageToBeSent, false);
+                        clients.get(i).sendMessage(new ChatMessage(4, username, clients.get(i).username));//this is where the other user needs to get a message to change their box
+                    }//close if
+                }//close for
+            } else if (action == cm.START_GAME) {
                 //TODO tic tac toe
                 for (int i = 0; i < clients.size(); i++) {
                     if (clients.get(i).username.equals(toUser)) {
@@ -206,7 +214,7 @@ final class ChatServer {
                         System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
                         System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent,false));
                         //todo: send a started game message to the other client
-                        clients.get(i).sendMessage(new ChatMessage(4, username, clients.get(i).username));
+                        clients.get(i).sendMessage(new ChatMessage(5, username, clients.get(i).username));
 
                     }//close if
                 }//close for
