@@ -19,8 +19,6 @@ final class ChatClient {
     private String messageSender;
     private String user;
     private boolean loggedOut = false;
-    private ArrayList<String> clientsInTTTGame = new ArrayList<String>(); //array list for clients who are in the game
-    private ArrayList<TTT> games = new ArrayList<TTT>(); //array list for threads that have the game
 
     /* ChatClient constructor
      * @param server - the ip address of the server as a string
@@ -174,25 +172,11 @@ final class ChatClient {
      * It will be responsible for listening for messages from the ChatServer.
      * ie: When other clients send messages, the server will relay it to the client.
      */
-    private final class ListenFromServer implements Runnable { //todo: listen for a chat message here?
+    private final class ListenFromServer implements Runnable {
         public void run() {
             while (true) {
                 try {
                     Object input = sInput.readObject();
-                    if (input instanceof ChatMessage) {
-                        if(((ChatMessage) input).getTypeOfMessage() == ChatMessage.START_GAME){
-                            clientsInTTTGame.add(((ChatMessage) input).getMessage());
-                            System.out.println(((ChatMessage) input).getMessage());
-                            games.add(new TTT(((ChatMessage) input).getMessage(), false));
-                            continue;
-                        }
-                        if(((ChatMessage) input).getTypeOfMessage() == ChatMessage.TICTACTOE){
-                            //set the correct TTT box to be equal to the box just sent to it
-                            //should probably get the move that the other client just made, count it as a take turn (that should update
-
-                            continue;
-                        }
-                    }
                     String msg = (String) input;
                     System.out.print(msg);
                 } catch (IOException | ClassNotFoundException e) {
@@ -202,43 +186,6 @@ final class ChatClient {
                 }
             }
             System.exit(0); //If we want reprompt instead of close take this out
-        }
-    }
-
-    private final class TTT{//todo: this
-        String opponent;
-        boolean didStart;
-        int move;
-        int moves;
-        TicTacToeGame game;
-        private TTT(String opponent, boolean didStart, int move){
-            this.opponent = opponent;
-            this.didStart = didStart;
-            this.move = move;
-        }
-
-        private TTT(String opponent, boolean didStart){
-            this.opponent = opponent;
-            this.didStart = didStart;
-            if(didStart){
-                game = new TicTacToeGame(username, true);
-            }
-            else{
-                game = new TicTacToeGame(username, false);
-            }
-        }
-
-        public String getBox(){
-            return game.printbox();
-        }
-
-        public void playGame(int move){
-           game.takeTurn(move);
-           System.out.println(game.printbox());
-        }
-
-        public void takeTurn(int move){
-            game.takeTurn(move); //this is to keep track of turns other client made, easiest way to update box, I think
         }
     }
 
@@ -285,39 +232,10 @@ final class ChatClient {
                                 continue;
                             }
                         }else if(decision == ChatMessage.TICTACTOE){
-                            if(userInputs.length > 2){
-                                //todo: start TTT thread and send message to make other client start thread | go to thread where the game is already happening
-                                boolean clientInGame = false;
-                                for(int i = 0; i < clientsInTTTGame.size(); i++){ //iterate through array
-                                    if(userName.equals(clientsInTTTGame.get(i))) { //test if the client is already in a game with this client
-                                        //todo: make it go to the thread that is already carrying this game
-                                        clientInGame = true;
-                                        String message  = client.messageRebuilder(userInputs, 2);
-                                        //int index = message.indexOf(' ');
-                                        if(message.length() == 0){
-                                            System.out.println("print box"); //todo: make it print the box for the current game
-                                        }
-                                        else {
-                                            try {
-                                                int move = Integer.parseInt(message.substring(0, 1));
-                                                games.get(i).playGame(move);
-                                                client.sendMessage(new ChatMessage(decision, "message", userName));
-                                            }
-                                            catch(IllegalArgumentException e){
-                                                System.out.println(message);
-                                                System.out.println("Please enter a number between 0 and 9 to make a move");
-                                            }
-                                        }
-                                    }
-                                }
-                                if(!clientInGame){//if client is not in the game with this client
-                                    TTT game = new TTT(userName, true); //todo: make it start a TTT thread
-                                    clientsInTTTGame.add(userName);
-                                    games.add(game);
-                                   //todo: send start game message to the server
-                                    client.sendMessage(new ChatMessage(5, "Started TicTacToe with " + client.username, userName));
-                                    System.out.println("Started TicTacToe with " + userName);
-                                }
+                            if (userInputs.length > 2) {
+                                String message = client.messageRebuilder(userInputs, 2);
+                                client.sendMessage(new ChatMessage(decision, message, userName));
+
                             }
                         }
                     }

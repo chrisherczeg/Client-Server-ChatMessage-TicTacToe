@@ -14,6 +14,7 @@ final class ChatServer {
     // Data structure to hold all of the connected clients
     private final List<ClientThread> clients = new ArrayList<>();
     private final int port;			// port the server is hosted on
+    ArrayList<TicTacToeGame> games = new ArrayList<TicTacToeGame>();
 
     /**
      * ChatServer constructor
@@ -98,7 +99,7 @@ final class ChatServer {
      * This is a private class inside of the ChatServer
      * A new thread will be created to run this every time a new client connects.
      */
-    private final class ClientThread implements Runnable { //this is where you should process the different kinds of messages, in that run method, you look at the different messages and do what is required
+    private final class ClientThread implements Runnable {
         Socket socket;                  // The socket the client is connected to
         ObjectInputStream sInput;       // Input stream to the server from the client
         ObjectOutputStream sOutput;     // Output stream to the client from the server
@@ -106,6 +107,7 @@ final class ChatServer {
         ChatMessage cm;                 // Helper variable to manage messages
         int id;
         private ChatServer server;
+
 
         /*
          * socket - the socket the client is connected to
@@ -128,7 +130,7 @@ final class ChatServer {
          * This is what the client thread actually runs.
          */
         @Override
-        public void run() {
+        public synchronized void run() {
             boolean notAllowedToConnect = false;
             if(server.checkExistingUser(username)){
                 clients.get(id).writeMessage("Sorry a username: " + clients.get(id) + " already exists" , false);
@@ -198,26 +200,49 @@ final class ChatServer {
                 clients.get(userSendIndex).writeMessage(messageToBeSent, false);
 
             } else if(action == cm.TICTACTOE){
-                for (int i = 0; i < clients.size(); i++) {
-                    if (clients.get(i).username.equals(toUser)) {
-                        //System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
-                        clients.get(i).writeMessage(messageToBeSent, false);
-                        clients.get(i).sendMessage(new ChatMessage(4, username + ' ' + messageToBeSent, clients.get(i).username));//this is where the other user needs to get a message to change their box
-                    }//close if
-                }//close for
-            } else if (action == cm.START_GAME) {
-                //TODO tic tac toe
-                for (int i = 0; i < clients.size(); i++) {
-                    if (clients.get(i).username.equals(toUser)) {
-                        //TicTacToeGame game = new TicTacToeGame(toUser, false);//maybe we could make an array list of all the current tictactoe games
-                        //System.out.print(game.toString());
-                        System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
-                        System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent,false));
-                        //todo: send a started game message to the other client
-                        clients.get(i).sendMessage(new ChatMessage(5, username, clients.get(i).username));
-
-                    }//close if
-                }//close for
+                //todo: check if the two users are in a game together
+                boolean inGame = false;
+                for(int i = 0; i < games.size(); i++){
+                    System.out.println(games.get(i).player1 + " " + games.get(i).player2);
+                    if(games.get(i).equalTo(username, toUser)){ //username and toUser are the two strings that represent the relevant user names
+                        //todo: process moves for users in game together, and print box for both users
+                        inGame = true;
+                        int nextMove = -1;
+                        try {
+                            nextMove = Integer.parseInt(messageToBeSent.substring(0,1));
+                        }
+                        catch(IllegalArgumentException e){
+                            System.out.println("Please enter a valid move.");
+                        }
+                        games.get(i).takeTurn(nextMove);
+                        this.writeMessage(games.get(i).printbox(), false);
+                        for (int j = 0; j < clients.size(); j++) {
+                            if (clients.get(j).username.equals(toUser)) {
+                                clients.get(j).writeMessage(games.get(i).printbox(), false);
+                            }//close if
+                        }//close for
+                        //todo: check if the game is over
+                        if(games.get(i).gameOver()){
+                            this.writeMessage("The winner is " + games.get(i).winner(), false);
+                            for(int j = 0; j < clients.size(); j++){
+                                if(clients.get(j).username.equals(toUser)){
+                                    clients.get(j).writeMessage("The winner is " + games.get(i).winner(), false);
+                                }
+                            }
+                        }
+                    }
+                }
+                if(!inGame){
+                    //todo: start a game if they are not in a game together
+                    games.add(new TicTacToeGame(username, toUser));
+                    for (int i = 0; i < clients.size(); i++) {
+                        if (clients.get(i).username.equals(toUser)) {
+                            //System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
+                            clients.get(i).writeMessage("Started game with " + username, false);
+                            this.writeMessage("Started game with " + clients.get(i).username, false);
+                        }//close if
+                    }//close for
+                }
 
             }
         }

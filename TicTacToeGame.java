@@ -4,6 +4,8 @@ public class TicTacToeGame{
     private static final char PLAYERX = 'X';     // Helper constant for X player
     private static final char PLAYERO = 'O';     // Helper constant for O player
     private static final char SPACE = ' ';       // Helper constant for spaces
+    public String player1;
+    public String player2;
 
     /*
     Sample TicTacToe Board
@@ -27,7 +29,9 @@ public class TicTacToeGame{
         }
     }
 
-    public TicTacToeGame(String otherPlayer, boolean isX){
+    public TicTacToeGame(String player1, String player2){
+        this.player1 = player1;
+        this.player2 = player2;
         for (int i = 0; i <3 ; i++) {
             for (int j = 0; j <3 ; j++) {
                 this.box[i][j]=' ';
@@ -36,12 +40,11 @@ public class TicTacToeGame{
 
     }
 
-
-    public String printbox(){
+    public synchronized String printbox(){
         return("Game Board\n"+box[0][0]+" | "+box[0][1]+" | "+box[0][2]+"\n-----------\n "+box[1][0]+" | "+box[1][1]+" | "+box[1][2]+"\n-----------\n "+box[2][0]+" | "+box[2][1]+" | "+box[2][2]);
     }
 
-    public int takeTurn(int index){
+    public synchronized int takeTurn(int index){
 
         if(playerturn==0 || playerturn%2==0) {
             if (index == 0) {
@@ -107,7 +110,7 @@ public class TicTacToeGame{
         return 0;
     }
 
-    public char getWinner(){
+    public synchronized char getWinner(){
 
         if(box[0][0]=='X' && box[0][1]=='X' && box[0][2]=='X'){
             tie=false;
@@ -163,7 +166,22 @@ public class TicTacToeGame{
 
     }
 
-    public int isTied(){
+    public synchronized boolean gameOver(){
+        if(this.getWinner() == 'O' || this.getWinner() == 'X'){
+            return true;
+        }
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                if (box[i][j] == ' '){
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public synchronized int isTied(){
         if(tie){
             return 0;
         }else{
@@ -172,11 +190,11 @@ public class TicTacToeGame{
         }
     }
 
-    public char getSpace(int index){
+    public synchronized char getSpace(int index){
         return SPACE;
     }
 
-    public String toString() {
+    public synchronized String toString() {
         String win="";
         if(getWinner()==PLAYERX){
             win="Player 1 wins";
@@ -186,6 +204,30 @@ public class TicTacToeGame{
             win="Match Tied";
         }
         return win;
+    }
+
+    public synchronized String winner() {
+        if(getWinner()==PLAYERX){
+            return player1;
+        } else if(getWinner()==PLAYERO){
+            return player2;
+        } else {
+            return"Match Tied";
+        }
+    }
+
+    public synchronized boolean equalTo(String player1, String player2){ //use to check if users are already in game together, regardless of order they are entered in
+        if(this.player1.equals(player1)){
+            if(this.player2.equals(player2)){
+                return true;
+            }
+        }
+        if(this.player2.equals(player1)){
+            if(this.player1.equals(player2)){
+                return true;
+            }
+        }
+        return false;
     }
 
 }
