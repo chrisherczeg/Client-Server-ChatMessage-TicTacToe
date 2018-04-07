@@ -224,6 +224,10 @@ final class ChatClient {
                         if(decision == ChatMessage.DM) {
                             if (userInputs.length > 2) {
                                 String message = client.messageRebuilder(userInputs, 2);
+                                if(client.username.equals(userName)){
+                                    System.out.println("You may not direct message yourself. Go make friends.");
+                                    continue;
+                                }
                                 client.sendMessage(new ChatMessage(decision, client.username  + " -> " + userName + ": " + message, userName));
                                 Date now = new Date();
                                 SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -234,6 +238,10 @@ final class ChatClient {
                         }else if(decision == ChatMessage.TICTACTOE){
                             if (userInputs.length > 2) {
                                 String message = client.messageRebuilder(userInputs, 2);
+                                if(client.username.equals(userName)){
+                                    System.out.println("You may not play tictactoe with yourself. Go make friends.");
+                                    continue;
+                                }
                                 client.sendMessage(new ChatMessage(decision, message, userName));
 
                             }

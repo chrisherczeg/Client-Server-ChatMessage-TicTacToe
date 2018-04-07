@@ -282,15 +282,6 @@ final class ChatServer {
                 }
             }
         }
-        private void sendMessage(ChatMessage msg) {
-            try {
-                sOutput.writeObject(msg);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
     }
 
     private synchronized void broadcast(String message){
