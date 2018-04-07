@@ -188,6 +188,8 @@ final class ChatClient {
                         }
                         if(((ChatMessage) input).getTypeOfMessage() == ChatMessage.TICTACTOE){
                             //set the correct TTT box to be equal to the box just sent to it
+                            //should probably get the move that the other client just made, count it as a take turn (that should update
+
                             continue;
                         }
                     }
@@ -233,6 +235,10 @@ final class ChatClient {
         public void playGame(int move){
            game.takeTurn(move);
            System.out.println(game.printbox());
+        }
+
+        public void takeTurn(int move){
+            game.takeTurn(move); //this is to keep track of turns other client made, easiest way to update box, I think
         }
     }
 
@@ -295,7 +301,7 @@ final class ChatClient {
                                             try {
                                                 int move = Integer.parseInt(message.substring(0, 1));
                                                 games.get(i).playGame(move);
-                                                client.sendMessage(new ChatMessage(decision, games.get(i).getBox(), userName));
+                                                client.sendMessage(new ChatMessage(decision, "message", userName));
                                             }
                                             catch(IllegalArgumentException e){
                                                 System.out.println(message);

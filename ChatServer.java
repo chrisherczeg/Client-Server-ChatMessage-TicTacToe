@@ -98,7 +98,7 @@ final class ChatServer {
      * This is a private class inside of the ChatServer
      * A new thread will be created to run this every time a new client connects.
      */
-    private final class ClientThread implements Runnable {
+    private final class ClientThread implements Runnable { //this is where you should process the different kinds of messages, in that run method, you look at the different messages and do what is required
         Socket socket;                  // The socket the client is connected to
         ObjectInputStream sInput;       // Input stream to the server from the client
         ObjectOutputStream sOutput;     // Output stream to the client from the server
@@ -202,7 +202,7 @@ final class ChatServer {
                     if (clients.get(i).username.equals(toUser)) {
                         //System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
                         clients.get(i).writeMessage(messageToBeSent, false);
-                        clients.get(i).sendMessage(new ChatMessage(4, username, clients.get(i).username));//this is where the other user needs to get a message to change their box
+                        clients.get(i).sendMessage(new ChatMessage(4, username + ' ' + messageToBeSent, clients.get(i).username));//this is where the other user needs to get a message to change their box
                     }//close if
                 }//close for
             } else if (action == cm.START_GAME) {
