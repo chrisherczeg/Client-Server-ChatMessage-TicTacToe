@@ -201,11 +201,12 @@ final class ChatServer {
                 //TODO tic tac toe
                 for (int i = 0; i < clients.size(); i++) {
                     if (clients.get(i).username.equals(toUser)) {
-                        TicTacToeGame game = new TicTacToeGame(toUser, false);//maybe we could make an array list of all the current tictactoe games
+                        //TicTacToeGame game = new TicTacToeGame(toUser, false);//maybe we could make an array list of all the current tictactoe games
                         //System.out.print(game.toString());
                         System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
-                        System.out.println("Success: " + clients.get(i).writeMessage("Started game with " + this.username,false));
-                        this.writeMessage("Started game with " + clients.get(i).username, false);
+                        System.out.println("Success: " + clients.get(i).writeMessage(messageToBeSent,false));
+                        //todo: send a started game message to the other client
+                        //this.writeMessage("Started game with " + clients.get(i).username, false);
                         //so now its told both clients that they have started the game
                         //I need to get the next string that this client inputs
                         /*while(true) { //need a different way to say while game is still going, do this(maybe put a method in tictactoe

@@ -174,7 +174,7 @@ final class ChatClient {
      * It will be responsible for listening for messages from the ChatServer.
      * ie: When other clients send messages, the server will relay it to the client.
      */
-    private final class ListenFromServer implements Runnable {
+    private final class ListenFromServer implements Runnable { //todo: listen for a chat message here?
         public void run() {
             while (true) {
                 try {
@@ -190,10 +190,11 @@ final class ChatClient {
         }
     }
 
-    private final class TTT implements Runnable{
+    private final class TTT implements Runnable{//todo: this
         String opponent;
         boolean didStart;
         int move;
+        int moves;
         private TTT(String opponent, boolean didStart, int move){
             this.opponent = opponent;
             this.didStart = didStart;
@@ -206,11 +207,10 @@ final class ChatClient {
         }
 
         public void run(){
-            TicTacToeGame game = new TicTacToeGame();
-           while(move != 10){
-                game.takeTurn(move);
-                game.printbox();
-
+           TicTacToeGame game = new TicTacToeGame();
+           while(moves != 10){
+               game.takeTurn(move);
+               game.printbox();
            }
         }
     }
@@ -262,19 +262,34 @@ final class ChatClient {
                                 //todo: start TTT thread and send message to make other client start thread | go to thread where the game is already happening
                                 boolean clientInGame = false;
                                 for(int i = 0; i < clientsInTTTGame.size(); i++){ //iterate through array
-                                    if(userName == clientsInTTTGame.get(i)) { //test if the client is already in a game with this client
+                                    if(userName.equals(clientsInTTTGame.get(i))) { //test if the client is already in a game with this client
                                         //todo: make it go to the thread that is already carrying this game
                                         clientInGame = true;
-                                        //TTT(userName, true, 0);
+                                        String message  = client.messageRebuilder(userInputs, 2);
+                                        //int index = message.indexOf(' ');
+                                        if(message.length() == 0){
+                                            System.out.println("print box"); //todo: make it print the box for the current game
+                                        }
+                                        else {
+                                            try {
+                                                int move = Integer.parseInt(message);
+                                                //games.get(i)
+                                            }
+                                            catch(IllegalArgumentException e){
+                                                System.out.println("Please enter a number between 0 and 9 to make a move");
+                                            }
+                                        }
                                     }
                                 }
-                                if(!clientInGame){
-                                   Thread game = new Thread(); //todo: make it start a TTT thread
-                                   games.add(game);
-                                   game.start();
+                                if(!clientInGame){//if client is not in the game with this client
+                                    Thread game = new Thread(new TTT(userName, true)); //todo: make it start a TTT thread
+                                    clientsInTTTGame.add(userName);
+                                    games.add(game);
+                                    game.start();
+                                   //todo: send start game message to the server
+                                    client.sendMessage(new ChatMessage(decision, "Started TicTacToe with " + client.username, userName));
+                                    System.out.println("Started TicTacToe with " + userName);
                                 }
-
-
                             }
                         }
                     }
