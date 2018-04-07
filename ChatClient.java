@@ -20,7 +20,7 @@ final class ChatClient {
     private String user;
     private boolean loggedOut = false;
     private ArrayList<String> clientsInTTTGame = new ArrayList<String>(); //array list for clients who are in the game
-    private ArrayList<Thread> games = new ArrayList<Thread>(); //array list for threads that have the game
+    private ArrayList<TTT> games = new ArrayList<TTT>(); //array list for threads that have the game
 
     /* ChatClient constructor
      * @param server - the ip address of the server as a string
@@ -178,7 +178,14 @@ final class ChatClient {
         public void run() {
             while (true) {
                 try {
-                    String msg = (String) sInput.readObject();
+                    Object input = sInput.readObject();
+                    if (input instanceof ChatMessage) {
+                        clientsInTTTGame.add(((ChatMessage) input).getMessage());
+                        System.out.println(((ChatMessage) input).getMessage());
+                        games.add(new TTT(((ChatMessage) input).getMessage(), false));
+                        continue;
+                    }
+                    String msg = (String) input;
                     System.out.print(msg);
                 } catch (IOException | ClassNotFoundException e) {
                     System.out.println("Server has closed the connection");
@@ -190,11 +197,12 @@ final class ChatClient {
         }
     }
 
-    private final class TTT implements Runnable{//todo: this
+    private final class TTT{//todo: this
         String opponent;
         boolean didStart;
         int move;
         int moves;
+        TicTacToeGame game;
         private TTT(String opponent, boolean didStart, int move){
             this.opponent = opponent;
             this.didStart = didStart;
@@ -204,14 +212,21 @@ final class ChatClient {
         private TTT(String opponent, boolean didStart){
             this.opponent = opponent;
             this.didStart = didStart;
+            if(didStart){
+                game = new TicTacToeGame(username, true);
+            }
+            else{
+                game = new TicTacToeGame(username, false);
+            }
         }
 
-        public void run(){
-           TicTacToeGame game = new TicTacToeGame();
-           while(moves != 10){
-               game.takeTurn(move);
-               game.printbox();
-           }
+        public String getBox(){
+            return game.printbox();
+        }
+
+        public void playGame(int move){
+           game.takeTurn(move);
+           System.out.println(game.printbox());
         }
     }
 
@@ -272,20 +287,21 @@ final class ChatClient {
                                         }
                                         else {
                                             try {
-                                                int move = Integer.parseInt(message);
-                                                //games.get(i)
+                                                int move = Integer.parseInt(message.substring(0, 1));
+                                                games.get(i).playGame(move);
+                                                client.sendMessage(new ChatMessage(2, games.get(i).getBox(), userName));
                                             }
                                             catch(IllegalArgumentException e){
+                                                System.out.println(message);
                                                 System.out.println("Please enter a number between 0 and 9 to make a move");
                                             }
                                         }
                                     }
                                 }
                                 if(!clientInGame){//if client is not in the game with this client
-                                    Thread game = new Thread(new TTT(userName, true)); //todo: make it start a TTT thread
+                                    TTT game = new TTT(userName, true); //todo: make it start a TTT thread
                                     clientsInTTTGame.add(userName);
                                     games.add(game);
-                                    game.start();
                                    //todo: send start game message to the server
                                     client.sendMessage(new ChatMessage(decision, "Started TicTacToe with " + client.username, userName));
                                     System.out.println("Started TicTacToe with " + userName);
