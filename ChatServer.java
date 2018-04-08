@@ -247,7 +247,7 @@ final class ChatServer {
                                     games.get(i).takeTurn(nextMove);
                                     for (int j = 0; j < clients.size(); j++) {
                                         if (clients.get(j).username.equals(toUser)) {
-                                            clients.get(j).writeMessage(games.get(i).printbox(), false);
+                                            clients.get(j).writeMessage(this.username + "->" + games.get(i).printbox(), false);
                                         }//close if
                                     }//close for
                                 } else {
@@ -256,7 +256,7 @@ final class ChatServer {
                             } else {
                                 this.writeMessage("It is not your turn.", false);
                             }
-                            this.writeMessage(games.get(i).printbox(), false);
+                            this.writeMessage(toUser + "->" + games.get(i).printbox(), false);
 
 
                             //todo: check if the game is over
