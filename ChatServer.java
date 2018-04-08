@@ -235,7 +235,9 @@ final class ChatServer {
 
                             int nextMove = -1;
                             try {
-                                nextMove = Integer.parseInt(messageToBeSent.substring(0, messageToBeSent.length()));
+                                String[] number = messageToBeSent.split(" ");
+                                nextMove = Integer.parseInt(number[0]);
+
                             } catch (IllegalArgumentException e) {
                                 System.out.println("Please enter a valid move.");
                             }
