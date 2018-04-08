@@ -236,7 +236,7 @@ final class ChatClient {
                                 continue;
                             }
                         }else if(decision == ChatMessage.TICTACTOE){
-                            if (userInputs.length > 2) {
+
                                 String message = client.messageRebuilder(userInputs, 2);
                                 if(client.username.equals(userName)){
                                     System.out.println("You may not play tictactoe with yourself. Go make friends.");
@@ -244,7 +244,7 @@ final class ChatClient {
                                 }
                                 client.sendMessage(new ChatMessage(decision, message, userName));
 
-                            }
+
                         }
                     }
                         //Handle Logout

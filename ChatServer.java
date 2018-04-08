@@ -150,7 +150,12 @@ final class ChatServer {
                 String dateMsg = dateFormat.format(now);
                 int indexOf = cm.getMessage().indexOf(" ");
                 //HACKY AF
-                System.out.println(dateMsg + " " +  username + "" + cm.getMessage().substring(indexOf));
+                if(indexOf == -1){
+
+                }
+                else {
+                    System.out.println(dateMsg + " " + username + "" + cm.getMessage().substring(indexOf));
+                }
 
             // Send message back to the client
             String toUser = cm.getUserNameOfRecipient();
@@ -202,45 +207,47 @@ final class ChatServer {
             } else if(action == cm.TICTACTOE){
                 //todo: check if the two users are in a game together
                 boolean inGame = false;
-                for(int i = 0; i < games.size(); i++){
-                    System.out.println(games.get(i).player1 + " " + games.get(i).player2);
-                    if(games.get(i).equalTo(username, toUser)){ //username and toUser are the two strings that represent the relevant user names
+                for(int i = 0; i < games.size(); i++) {
+                    if (games.get(i).equalTo(username, toUser)) { //username and toUser are the two strings that represent the relevant user names
                         //todo: process moves for users in game together, and print box for both users
                         inGame = true;
-                        int nextMove = -1;
-                        try {
-                            nextMove = Integer.parseInt(messageToBeSent.substring(0,1));
-                        }
-                        catch(IllegalArgumentException e){
-                            System.out.println("Please enter a valid move.");
-                        }
-                        if(games.get(i).inTurn(this.username)){
-                            if(games.get(i).makeMove(nextMove)){
-                                games.get(i).takeTurn(nextMove);
-                            }
-                            else{
-                                this.writeMessage("You cannot place a move here", false);
-                            }
-                        }
-                        else{
-                            this.writeMessage("It is not your turn.", false);
-                        }
+                        if (messageToBeSent.length() == 0) {
+                            this.writeMessage(games.get(i).printbox(), false);
+                        } else {
 
-                        this.writeMessage(games.get(i).printbox(), false);
-                        for (int j = 0; j < clients.size(); j++) {
-                            if (clients.get(j).username.equals(toUser)) {
-                                clients.get(j).writeMessage(games.get(i).printbox(), false);
-                            }//close if
-                        }//close for
-                        //todo: check if the game is over
-                        if(games.get(i).gameOver()){
-                            this.writeMessage("The winner is " + games.get(i).winner(), false);
-                            for(int j = 0; j < clients.size(); j++){
-                                if(clients.get(j).username.equals(toUser)){
-                                    clients.get(j).writeMessage("The winner is " + games.get(i).winner(), false);
-                                }
+                            int nextMove = -1;
+                            try {
+                                nextMove = Integer.parseInt(messageToBeSent.substring(0, 1));
+                            } catch (IllegalArgumentException e) {
+                                System.out.println("Please enter a valid move.");
                             }
-                            games.remove(i);
+                            if (games.get(i).inTurn(this.username)) {
+                                if (games.get(i).makeMove(nextMove)) {
+                                    games.get(i).takeTurn(nextMove);
+                                    for (int j = 0; j < clients.size(); j++) {
+                                        if (clients.get(j).username.equals(toUser)) {
+                                            clients.get(j).writeMessage(games.get(i).printbox(), false);
+                                        }//close if
+                                    }//close for
+                                } else {
+                                    this.writeMessage("You cannot place a move here, please enter a valid index between 0 and 8.", false);
+                                }
+                            } else {
+                                this.writeMessage("It is not your turn.", false);
+                            }
+                            this.writeMessage(games.get(i).printbox(), false);
+
+
+                            //todo: check if the game is over
+                            if (games.get(i).gameOver()) {
+                                this.writeMessage("The winner is " + games.get(i).winner(), false);
+                                for (int j = 0; j < clients.size(); j++) {
+                                    if (clients.get(j).username.equals(toUser)) {
+                                        clients.get(j).writeMessage("The winner is " + games.get(i).winner(), false);
+                                    }
+                                }
+                                games.remove(i);
+                            }
                         }
                     }
                 }
