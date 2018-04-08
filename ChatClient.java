@@ -130,7 +130,9 @@ final class ChatClient {
             client = new ChatClient(args[2], port, args[0]);
         }
         if(!(client.start(client))){
-            System.out.println("Could not start the client, check that a Server is started.");
+            System.out.println("Could not start the client, waiting for connection");
+            while(!(client.start(client))){
+            }
         }else if (!client.socket.isConnected()) {
             System.out.println("Sorry Connection closed");
         }
