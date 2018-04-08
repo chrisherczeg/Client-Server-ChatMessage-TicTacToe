@@ -117,12 +117,18 @@ final class ChatClient {
      * If the username is not specified "Anonymous" should be used
      */
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        // Get proper arguments and override defaults
-        // Create your client and start it
-        System.out.printf("Enter your username to sign into the Chat client: ");
-        String user = in.nextLine();
-        ChatClient client = new ChatClient("localhost", 1500, user);
+        ChatClient client = null;
+        if(args.length == 1){
+            client = new ChatClient("localhost", 1500, args[0]);
+
+        }else if(args.length == 2){
+            int port = Integer.parseInt(args[1]);
+            client = new ChatClient("localhost", port, args[0]);
+
+        }else{
+            int port = Integer.parseInt(args[1]);
+            client = new ChatClient(args[2], port, args[0]);
+        }
         if(!(client.start(client))){
             System.out.println("Could not start the client, check that a Server is started.");
         }else if (!client.socket.isConnected()) {
@@ -230,9 +236,9 @@ final class ChatClient {
                                 }
                                 client.sendMessage(new ChatMessage(decision, client.username  + " -> " + userName + ": " + message, userName));
                                 Date now = new Date();
-                                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-                                String datemsg = dateFormat.format(now);
-                                System.out.println(datemsg + " " +client.username  + " -> " + userName + ": " + message);
+//                                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+//                                String datemsg = dateFormat.format(now);
+//                                System.out.println(datemsg + " " +client.username  + " -> " + userName + ": " + message);
                                 continue;
                             }
                         }else if(decision == ChatMessage.TICTACTOE){
