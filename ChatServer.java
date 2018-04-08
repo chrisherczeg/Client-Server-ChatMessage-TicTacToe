@@ -206,7 +206,7 @@ final class ChatServer {
                         clients.remove(i);
                     }
                 }
-                System.out.print("Logged out");
+                System.out.print(this.username + " disconnected with a LOGOUT message");
                 break;
             } else if (action == cm.LIST) {
                 messageToBeSent = "User List: \n";

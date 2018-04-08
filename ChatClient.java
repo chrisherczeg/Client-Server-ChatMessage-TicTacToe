@@ -25,19 +25,19 @@ final class ChatClient {
      * @param port - the port number the server is hosted on
      * @param username - the username of the user connecting
      */
-    private ChatClient(String server, int port, String username) {
+    private ChatClient(String username, int port, String server) {
         this.server = server;
         this.port = port;
         this.username = username;
     }
 
-    private ChatClient(int port, String username) {
-        this.server = "local host";
+    private ChatClient(String username, int port) {
+        this.server = "localhost";
         this.port = port;
         this.username = username;
     }
     private ChatClient(String username) {
-        this.server = "local host";
+        this.server = "localhost";
         this.port = 1500;
         this.username = username;
     }
@@ -72,7 +72,7 @@ final class ChatClient {
         }
 
         // Create client thread to listen from the server for incoming messages
-        System.out.println("Connection accepted " + ccc.server +"/" + ccc.port);
+        System.out.println("Connection accepted " + socket.getInetAddress() + ":" + ccc.port );
         Runnable r = new ListenFromServer();
         Thread t = new Thread(r);
         Runnable k = new KeyInput(ccc);
@@ -119,15 +119,15 @@ final class ChatClient {
     public static void main(String[] args) {
         ChatClient client = null;
         if(args.length == 1){
-            client = new ChatClient("localhost", 1500, args[0]);
+            client = new ChatClient(args[0]);
 
         }else if(args.length == 2){
             int port = Integer.parseInt(args[1]);
-            client = new ChatClient("localhost", port, args[0]);
+            client = new ChatClient(args[0], port);
 
         }else{
             int port = Integer.parseInt(args[1]);
-            client = new ChatClient(args[2], port, args[0]);
+            client = new ChatClient(args[0], port, args[2]);
         }
         if(!(client.start(client))){
             System.out.println("Could not start the client, waiting for connection");

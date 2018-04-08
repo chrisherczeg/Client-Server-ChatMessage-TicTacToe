@@ -293,7 +293,7 @@ public class TicTacToeGame{
         } else if(getWinner()==PLAYERO){
             return player2;
         } else {
-            return"Match Tied";
+            return"No one. The game was tied.";
         }
     }
 
