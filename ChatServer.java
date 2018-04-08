@@ -35,14 +35,15 @@ final class ChatServer {
             try {
                 ServerSocket serverSocket = new ServerSocket(port);
                 while (true) {
-                    System.out.println("<Server waiting for connection on port: " + this.port + ">");
+                    Date date = new Date();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                    String dateMsg = dateFormat.format(date);
+                    System.out.println(dateMsg + " " + "<Server waiting for connection on port: " + this.port + ">");
                     Socket socket = serverSocket.accept();
                     Runnable r = new ClientThread(socket, uniqueId++, client);
                     Thread t = new Thread(r);
                     clients.add((ClientThread) r);
-                    Date date = new Date();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-                    String dateMsg = dateFormat.format(date);
+
                     System.out.println(dateMsg + " " + ((ClientThread) r).username + " just connected");
                     t.start();
                 }
@@ -91,7 +92,8 @@ final class ChatServer {
      *  If the port number is not specified 1500 is used
      */
     public static void main(String[] args) {
-        ChatServer server = new ChatServer(1500);
+        int port = Integer.parseInt(args[0]);
+        ChatServer server = new ChatServer(port);
         server.start(server);
     }
 
@@ -143,7 +145,11 @@ final class ChatServer {
                 } catch (IOException | ClassNotFoundException e) {
                     //e.printStackTrace();
                     System.out.println("A Client forced closed without logging out, logging out for them");
-                    break;
+                    for (int i = 0; i <clients.size() ; i++) {
+                        if(!(clients.get(i).socket.isConnected())){
+                            clients.remove(i);
+                        }
+                    }
                 }
                 Date now = new Date();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -154,7 +160,7 @@ final class ChatServer {
 
                 }
                 else {
-                    System.out.println(dateMsg + " " + username + "" + cm.getMessage().substring(indexOf));
+
                 }
 
             // Send message back to the client
@@ -165,12 +171,21 @@ final class ChatServer {
              * Send Functionality for DM
              */
             if (action == cm.DM) {
+                boolean userNotFound = true;
                 for (int i = 0; i < clients.size(); i++) {
                     if (clients.get(i).username.equals(toUser)) {
                         //System.out.println("<ATTEMPTING SEND TO " + toUser + ">");
                         clients.get(i).writeMessage(messageToBeSent, false);
+                        System.out.println(dateMsg + " " + username + "" + cm.getMessage().substring(indexOf));
+                        this.writeMessage(messageToBeSent, false);
+                        userNotFound = false;
+                        break;
                     }//close if
                 }//close for
+                if(userNotFound) {
+                    this.writeMessage("User " + "(" + toUser + ")" + " is not online", false);
+                }
+
             } else if (action == cm.MESSAGE) {
                 messageToBeSent = username + ": " + messageToBeSent;
                 server.broadcast(messageToBeSent);
