@@ -15,6 +15,7 @@ final class ChatServer {
     private final List<ClientThread> clients = new ArrayList<>();
     private final int port;			// port the server is hosted on
     ArrayList<TicTacToeGame> games = new ArrayList<TicTacToeGame>();
+    public static Object lock = new Object();
 
     /**
      * ChatServer constructor
@@ -31,7 +32,7 @@ final class ChatServer {
      * This is what starts the ChatServer.
      * Right now it just creates the socketServer and adds a new ClientThread to a list to be handled
      */
-    private void start(ChatServer client) {
+    private void start() {
             try {
                 ServerSocket serverSocket = new ServerSocket(port);
                 while (true) {
@@ -40,7 +41,10 @@ final class ChatServer {
                     String dateMsg = dateFormat.format(date);
                     System.out.println(dateMsg + " " + "<Server waiting for connection on port: " + this.port + ">");
                     Socket socket = serverSocket.accept();
-                    Runnable r = new ClientThread(socket, uniqueId++, client);
+                    Runnable r = new ClientThread(socket, uniqueId, this);
+                    synchronized (lock) {
+                        uniqueId++;
+                    }
                     Thread t = new Thread(r);
                     clients.add((ClientThread) r);
 
@@ -92,9 +96,14 @@ final class ChatServer {
      *  If the port number is not specified 1500 is used
      */
     public static void main(String[] args) {
-        int port = Integer.parseInt(args[0]);
-        ChatServer server = new ChatServer(port);
-        server.start(server);
+        ChatServer server;
+        if(args.length > 0) {
+            int port = Integer.parseInt(args[0]);
+            server = new ChatServer(port);
+            server.start();
+        }else {
+            server = new ChatServer();
+        }
     }
 
     /*
@@ -135,7 +144,8 @@ final class ChatServer {
         public synchronized void run() {
             boolean notAllowedToConnect = false;
             if(server.checkExistingUser(username)){
-                clients.get(id).writeMessage("Sorry a username: " + clients.get(id) + " already exists" , false);
+                clients.get(id).writeMessage("Sorry a username: " + clients.get(id).username + " already exists" , false);
+                uniqueId--;
                 notAllowedToConnect = true;
             }
             // Read the username sent to you by client
@@ -155,13 +165,6 @@ final class ChatServer {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
                 String dateMsg = dateFormat.format(now);
                 int indexOf = cm.getMessage().indexOf(" ");
-                //HACKY AF
-                if(indexOf == -1){
-
-                }
-                else {
-
-                }
 
             // Send message back to the client
             String toUser = cm.getUserNameOfRecipient();
