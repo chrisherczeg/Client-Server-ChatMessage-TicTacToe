@@ -214,7 +214,12 @@ final class ChatServer {
                         catch(IllegalArgumentException e){
                             System.out.println("Please enter a valid move.");
                         }
-                        games.get(i).takeTurn(nextMove);
+                        if(games.get(i).makeMove(nextMove)){
+                            games.get(i).takeTurn(nextMove);
+                        }
+                        else{
+                            this.writeMessage("You cannot place a move here", false);
+                        }
                         this.writeMessage(games.get(i).printbox(), false);
                         for (int j = 0; j < clients.size(); j++) {
                             if (clients.get(j).username.equals(toUser)) {

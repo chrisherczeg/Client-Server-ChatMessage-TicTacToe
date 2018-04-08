@@ -44,6 +44,76 @@ public class TicTacToeGame{
         return("Game Board\n"+box[0][0]+" | "+box[0][1]+" | "+box[0][2]+"\n-----------\n "+box[1][0]+" | "+box[1][1]+" | "+box[1][2]+"\n-----------\n "+box[2][0]+" | "+box[2][1]+" | "+box[2][2]);
     }
 
+    public synchronized boolean makeMove(int index){
+        if (index == 0) {
+            if(box[0][0] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 1) {
+            if(box[0][1] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 2) {
+            if(box[0][2] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 3) {
+            if(box[1][0] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 4) {
+            if(box[1][1] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 5) {
+            if(box[1][2] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 6) {
+            if(box[2][0] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 7) {
+            if(box[2][1] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } else if (index == 8) {
+            if(box[2][2] == ' '){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+    }
+
     public synchronized int takeTurn(int index){
 
         if(playerturn==0 || playerturn%2==0) {
