@@ -242,6 +242,8 @@ final class ChatClient {
 //                                String datemsg = dateFormat.format(now);
 //                                System.out.println(datemsg + " " +client.username  + " -> " + userName + ": " + message);
                                 continue;
+                            }else{
+                                System.out.println("No message was sent, please add a message");
                             }
                         }else if(decision == ChatMessage.TICTACTOE){
 

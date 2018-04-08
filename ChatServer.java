@@ -160,6 +160,7 @@ final class ChatServer {
                             clients.remove(i);
                         }
                     }
+                    break;
                 }
                 Date now = new Date();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
