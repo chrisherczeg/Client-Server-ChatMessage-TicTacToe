@@ -240,6 +240,7 @@ final class ChatServer {
                                     clients.get(j).writeMessage("The winner is " + games.get(i).winner(), false);
                                 }
                             }
+                            games.remove(i);
                         }
                     }
                 }
