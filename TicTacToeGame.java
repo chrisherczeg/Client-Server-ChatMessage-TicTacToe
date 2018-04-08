@@ -44,6 +44,18 @@ public class TicTacToeGame{
         return("Game Board\n"+box[0][0]+" | "+box[0][1]+" | "+box[0][2]+"\n-----------\n "+box[1][0]+" | "+box[1][1]+" | "+box[1][2]+"\n-----------\n "+box[2][0]+" | "+box[2][1]+" | "+box[2][2]);
     }
 
+    public synchronized boolean inTurn(String user){
+        if((playerturn == 0 || playerturn % 2 == 0) && user.equals(player1)){
+            return true;
+        }
+        else if((playerturn == 1 || playerturn % 2 != 0) && user.equals(player2)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     public synchronized boolean makeMove(int index){
         if (index == 0) {
             if(box[0][0] == ' '){
