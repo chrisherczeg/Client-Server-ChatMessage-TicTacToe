@@ -217,7 +217,7 @@ final class ChatServer {
 
                             int nextMove = -1;
                             try {
-                                nextMove = Integer.parseInt(messageToBeSent.substring(0, 1));
+                                nextMove = Integer.parseInt(messageToBeSent.substring(0, messageToBeSent.length()));
                             } catch (IllegalArgumentException e) {
                                 System.out.println("Please enter a valid move.");
                             }
@@ -261,6 +261,7 @@ final class ChatServer {
                             this.writeMessage("Started game with " + clients.get(i).username, false);
                         }//close if
                     }//close for
+                    System.out.println(username + " has started a TicTacToe game with " + toUser);
                 }
 
             }
