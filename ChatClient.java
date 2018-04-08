@@ -253,8 +253,6 @@ final class ChatClient {
                                     continue;
                                 }
                                 client.sendMessage(new ChatMessage(decision, message, userName));
-
-
                         }
                     }
                         //Handle Logout

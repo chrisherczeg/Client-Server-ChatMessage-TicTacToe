@@ -166,7 +166,6 @@ final class ChatServer {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
                 String dateMsg = dateFormat.format(now);
                 int indexOf = cm.getMessage().indexOf(" ");
-
             // Send message back to the client
             String toUser = cm.getUserNameOfRecipient();
             int action = cm.getTypeOfMessage();
